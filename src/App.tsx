@@ -1,33 +1,49 @@
-import React from 'react';
-import { ThemeProvider, CssBaseline, createTheme } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { BrowserRouter } from 'react-router-dom';
 import Layout from './components/layout/Layout';
-import MainContent from './components/layout/MainContent';
+import SplashScreen from './components/splash/SplashScreen';
+import AppRoutes from './routes';
 
 const theme = createTheme({
   palette: {
     mode: 'dark',
+    background: {
+      default: '#000000',
+      paper: '#1E1E1E',
+    },
     primary: {
       main: '#8B8BFF',
     },
-    background: {
-      default: '#1E1E1E',
-      paper: '#2A2A2A',
-    },
   },
   typography: {
-    fontFamily: '"Segoe UI", "Roboto", "Arial", sans-serif',
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
   },
 });
 
-const App: React.FC = () => {
+function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000); // Show splash screen for 2 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Layout>
-        <MainContent />
-      </Layout>
+      {showSplash ? (
+        <SplashScreen />
+      ) : (
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      )}
     </ThemeProvider>
   );
-};
+}
 
 export default App;

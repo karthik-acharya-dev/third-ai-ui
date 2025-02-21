@@ -9,32 +9,54 @@ import {
   TextField,
   Typography,
   Box,
-  InputAdornment
+  InputAdornment,
+  useTheme,
+  useMediaQuery,
+  Avatar,
+  IconButton
 } from '@mui/material';
 import { 
   Chat, 
   Search,
   VideoCall,
   Image,
-  AudioFile
+  AudioFile,
+  MoreVert as MoreVertIcon
 } from '@mui/icons-material';
+import BottomBar from './BottomBar';
+import { useNavigate } from 'react-router-dom';
 
-const StyledDrawer = styled(Drawer)`
-  & .MuiDrawer-paper {
-    width: 300px;
-    background-color: #1E1E1E;
-    color: white;
-    display: flex;
-    flex-direction: column;
-  }
-`;
+interface SidebarProps {
+  open: boolean;
+  onClose: () => void;
+  variant: 'permanent' | 'temporary';
+}
+
+const StyledDrawer = styled(Drawer)(({ theme }) => ({
+  '& .MuiDrawer-paper': {
+    width: 300,
+    backgroundColor: 'rgba(39, 37, 37, 0.7)',
+    color: 'white',
+    display: 'flex',
+    flexDirection: 'column',
+    border: 'none',
+    [theme.breakpoints.down('md')]: {
+      width: '85%',
+      maxWidth: 300,
+    },
+  },
+  '& .MuiBackdrop-root': {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+}));
 
 const SearchContainer = styled(Box)`
   padding: 16px;
-  background-color: #1E1E1E;
+  background-color:rgba(39, 37, 37, 0.7)';
   position: sticky;
   top: 0;
   z-index: 1;
+  margin-top: 28px; // Space for the hamburger menu
 `;
 
 const SearchField = styled(TextField)`
@@ -87,7 +109,9 @@ const TimeSection = styled(Typography)`
 `;
 
 const StyledListItemButton = styled(ListItemButton)`
-  padding: 8px 16px;
+  padding: 12px 16px;
+  margin: 4px 8px;
+  border-radius: 8px;
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
@@ -96,6 +120,25 @@ const StyledListItemButton = styled(ListItemButton)`
 const ListItemContent = styled(Box)`
   display: flex;
   flex-direction: column;
+`;
+
+const UserInfo = styled(Box)`
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+`;
+
+const UserAvatar = styled(Avatar)`
+  width: 32px;
+  height: 32px;
+`;
+
+const UserActions = styled(Box)`
+  display: flex;
+  align-items: center;
+  margin-left: auto;
 `;
 
 const menuSections = [
@@ -128,9 +171,28 @@ const menuSections = [
   }
 ];
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<SidebarProps> = ({ open, onClose, variant }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
+
+  const handleSettingsClick = () => {
+    navigate('/settings');
+    if (isMobile) {
+      onClose();
+    }
+  };
+
   return (
-    <StyledDrawer variant="permanent" anchor="left">
+    <StyledDrawer 
+      variant={variant}
+      anchor="left"
+      open={open}
+      onClose={onClose}
+      ModalProps={{
+        keepMounted: true,
+      }}
+    >
       <SearchContainer>
         <SearchField
           fullWidth
@@ -150,7 +212,10 @@ const Sidebar: React.FC = () => {
             <TimeSection>{section.title}</TimeSection>
             <List>
               {section.items.map((item) => (
-                <StyledListItemButton key={item.text}>
+                <StyledListItemButton 
+                  key={item.text}
+                  onClick={() => isMobile && onClose()}
+                >
                   <ListItemIcon sx={{ color: 'white', minWidth: '40px' }}>
                     {item.icon}
                   </ListItemIcon>
@@ -168,6 +233,17 @@ const Sidebar: React.FC = () => {
           </React.Fragment>
         ))}
       </ScrollableContent>
+      <UserInfo>
+        <UserAvatar src="/avatar.jpg" alt="Adam Scott" />
+        <Typography variant="body2" sx={{ color: 'white' }}>
+          Adam Scott
+        </Typography>
+        <UserActions>
+          <IconButton size="small" sx={{ color: '#666' }} onClick={handleSettingsClick}>
+            <MoreVertIcon />
+          </IconButton>
+        </UserActions>
+      </UserInfo>
     </StyledDrawer>
   );
 };
